@@ -23,7 +23,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DashboardLayout } from "@/components/dashboard-layout"
 
 const performanceData = [
   { name: "Jan", executions: 4000, success: 3800, failed: 200, avgDuration: 45 },

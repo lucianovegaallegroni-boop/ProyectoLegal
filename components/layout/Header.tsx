@@ -27,9 +27,6 @@ export function Header() {
                     </div>
                     <span className="font-semibold text-gray-900">LegalTech</span>
                 </div>
-                <div className="text-sm text-gray-500">
-                    <span>Dashboard</span> <span className="mx-1">/</span> <span>Resumen</span>
-                </div>
             </div>
 
             <div className="flex items-center gap-4">

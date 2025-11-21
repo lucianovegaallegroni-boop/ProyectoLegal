@@ -25,7 +25,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { DashboardLayout } from "@/components/dashboard-layout"
 
 export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -44,8 +43,9 @@ export default function SettingsPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
+    <Card className="border-gray-200">
+
+      <div className="space-y-8 m-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -536,6 +536,6 @@ export default function SettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </Card>
   )
 }

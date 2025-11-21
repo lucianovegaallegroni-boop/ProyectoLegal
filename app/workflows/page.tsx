@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Play, Pause, MoreHorizontal, Filter, Plus, Search, CheckCircle, XCircle, Zap, Database } from "lucide-react"
+import { Play, Pause, MoreHorizontal, Filter, Plus, Search, CheckCircle, XCircle, Zap, Database, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -84,6 +84,21 @@ const recentRuns = [
 
 export default function WorkflowsPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [currentPageWorkflows, setCurrentPageWorkflows] = useState(1)
+  const [currentPageRuns, setCurrentPageRuns] = useState(1)
+  const itemsPerPage = 10
+
+  // Paginación para workflows
+  const totalPagesWorkflows = Math.ceil(workflows.length / itemsPerPage)
+  const startIndexWorkflows = (currentPageWorkflows - 1) * itemsPerPage
+  const endIndexWorkflows = startIndexWorkflows + itemsPerPage
+  const workflowsPaginados = workflows.slice(startIndexWorkflows, endIndexWorkflows)
+
+  // Paginación para runs
+  const totalPagesRuns = Math.ceil(recentRuns.length / itemsPerPage)
+  const startIndexRuns = (currentPageRuns - 1) * itemsPerPage
+  const endIndexRuns = startIndexRuns + itemsPerPage
+  const runsPaginados = recentRuns.slice(startIndexRuns, endIndexRuns)
 
   return (
     <div className="p-8">
@@ -145,7 +160,7 @@ export default function WorkflowsPage() {
             <TabsContent value="workflows" className="space-y-6">
               {/* Workflows Grid */}
               <div className="grid gap-6">
-                {workflows.map((workflow) => (
+                {workflowsPaginados.map((workflow) => (
                   <Card key={workflow.id} className="border-gray-200">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
@@ -229,6 +244,48 @@ export default function WorkflowsPage() {
                   </Card>
                 ))}
               </div>
+
+              {/* Paginación Workflows */}
+              {totalPagesWorkflows > 1 && (
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Mostrando {startIndexWorkflows + 1} a {Math.min(endIndexWorkflows, workflows.length)} de {workflows.length} workflows
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPageWorkflows(currentPageWorkflows - 1)}
+                      disabled={currentPageWorkflows === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Anterior
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPagesWorkflows }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={currentPageWorkflows === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPageWorkflows(page)}
+                          className={currentPageWorkflows === page ? "bg-purple-600 hover:bg-purple-700" : ""}
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPageWorkflows(currentPageWorkflows + 1)}
+                      disabled={currentPageWorkflows === totalPagesWorkflows}
+                    >
+                      Siguiente
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="runs" className="space-y-6">
@@ -250,7 +307,7 @@ export default function WorkflowsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {recentRuns.map((run) => (
+                      {runsPaginados.map((run) => (
                         <TableRow key={run.id} className="hover:bg-gray-50">
                           <TableCell className="font-mono">{run.id}</TableCell>
                           <TableCell className="font-medium">{run.workflow}</TableCell>
@@ -294,6 +351,48 @@ export default function WorkflowsPage() {
                       ))}
                     </TableBody>
                   </Table>
+
+                  {/* Paginación Runs */}
+                  {totalPagesRuns > 1 && (
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+                      <div className="text-sm text-gray-600">
+                        Mostrando {startIndexRuns + 1} a {Math.min(endIndexRuns, recentRuns.length)} de {recentRuns.length} ejecuciones
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPageRuns(currentPageRuns - 1)}
+                          disabled={currentPageRuns === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          Anterior
+                        </Button>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalPagesRuns }, (_, i) => i + 1).map((page) => (
+                            <Button
+                              key={page}
+                              variant={currentPageRuns === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPageRuns(page)}
+                              className={currentPageRuns === page ? "bg-purple-600 hover:bg-purple-700" : ""}
+                            >
+                              {page}
+                            </Button>
+                          ))}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPageRuns(currentPageRuns + 1)}
+                          disabled={currentPageRuns === totalPagesRuns}
+                        >
+                          Siguiente
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

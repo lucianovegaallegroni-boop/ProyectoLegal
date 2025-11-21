@@ -11,6 +11,7 @@ import {
     Database,
     Users,
     Settings,
+    UserCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils"
 const sidebarItems = [
     { href: "/", label: "Resumen", icon: Home },
     { href: "/workflows", label: "Casos", icon: Workflow },
+    { href: "/clientes", label: "Clientes", icon: UserCircle },
     { href: "/analytics", label: "Análisis", icon: BarChart3 },
     { href: "/templates", label: "Plantillas", icon: Database },
     { href: "/team", label: "Equipo", icon: Users },
