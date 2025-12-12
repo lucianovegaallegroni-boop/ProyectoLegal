@@ -12,6 +12,7 @@ import {
     Users,
     Settings,
     UserCircle,
+    CheckSquare,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,10 +20,11 @@ import { cn } from "@/lib/utils"
 
 const sidebarItems = [
     { href: "/", label: "Casos", icon: Home },
-    { href: "/workflows", label: "Trabajos", icon: Workflow },
+    { href: "/todos", label: "Tareas", icon: CheckSquare },
+    // { href: "/workflows", label: "Trabajos", icon: Workflow },
     { href: "/clientes", label: "Clientes", icon: UserCircle },
-    { href: "/analytics", label: "Análisis", icon: BarChart3 },
-    { href: "/templates", label: "Plantillas", icon: Database },
+    // { href: "/analytics", label: "Análisis", icon: BarChart3 },
+    // { href: "/templates", label: "Plantillas", icon: Database },
     { href: "/equipo", label: "Equipo", icon: Users },
     { href: "/settings", label: "Configuración", icon: Settings },
 ]
