@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils"
 
 const sidebarItems = [
     { href: "/", label: "Casos", icon: Home },
-    { href: "/todos", label: "Tareas", icon: CheckSquare },
+    // { href: "/todos", label: "Tareas", icon: CheckSquare },
     { href: "/clientes", label: "Clientes", icon: UserCircle },
     { href: "/equipo", label: "Equipo", icon: Users },
     { href: "/settings", label: "Configuración", icon: Settings },

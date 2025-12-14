@@ -407,31 +407,31 @@ export default function CaseDetailsPage() {
     }
 
     return (
-        <div className="p-8 space-y-8">
+        <div className="p-4 md:p-8 space-y-4 md:space-y-8">
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <Button variant="ghost" size="icon" className="self-start" onClick={() => router.back()}>
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{caseData.title}</h1>
-                    <div className="flex items-center gap-2 text-gray-500 mt-1">
-                        <span className="font-mono text-sm">#{caseData.id}</span>
-                        <span>•</span>
-                        <span>{caseData.client_name}</span>
+                <div className="flex-1 min-w-0">
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">{caseData.title}</h1>
+                    <div className="flex flex-wrap items-center gap-2 text-gray-500 mt-1 text-sm">
+                        <span className="font-mono">#{caseData.id}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="truncate">{caseData.client_name}</span>
                     </div>
                 </div>
-                <div className="ml-auto">
-                    <Badge className={`${getStatusColor(caseData.status)} px-3 py-1 text-sm`}>
+                <div className="self-start sm:self-auto sm:ml-auto">
+                    <Badge className={`${getStatusColor(caseData.status)} px-3 py-1 text-xs md:text-sm`}>
                         {getStatusLabel(caseData.status)}
                     </Badge>
                 </div>
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
                 {/* Left Column */}
-                <div className="col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-4 md:space-y-6">
                     {/* Resumen Card */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
@@ -453,7 +453,7 @@ export default function CaseDetailsPage() {
                             <p className="text-gray-700 leading-relaxed">
                                 {caseData.description || "Sin descripción disponible"}
                             </p>
-                            <div className="grid grid-cols-2 gap-4 pt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                                 <div className="flex items-start gap-3">
                                     <Scale className="w-5 h-5 text-gray-400 mt-0.5" />
                                     <div>
@@ -488,7 +488,7 @@ export default function CaseDetailsPage() {
 
                     {/* Tabs */}
                     <Tabs defaultValue="procedural" value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="grid w-full grid-cols-4 bg-gray-100/50 p-1">
+                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-gray-100/50 p-1">
                             {["procedural", "client", "strategy", "documents"].map((tab) => (
                                 <TabsTrigger key={tab} value={tab} className="relative data-[state=active]:bg-transparent">
                                     <span className="relative z-10">
@@ -525,7 +525,7 @@ export default function CaseDetailsPage() {
                                     }} />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="grid grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                         <div className="flex items-start gap-3">
                                             <Building className="w-5 h-5 text-gray-400 mt-0.5" />
                                             <div>
@@ -585,7 +585,7 @@ export default function CaseDetailsPage() {
                                     }} />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="grid grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                         <div className="flex items-start gap-3">
                                             <Building className="w-5 h-5 text-gray-400 mt-0.5" />
                                             <div>
@@ -675,10 +675,10 @@ export default function CaseDetailsPage() {
                         <TabsContent value="documents" className="mt-4">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between">
-                                    <CardTitle>Documentación del Caso</CardTitle>
+                                    <CardTitle className="text-base md:text-lg">Documentación del Caso</CardTitle>
                                     <Button size="sm" className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowDocumentoModal(true)}>
-                                        <Upload className="w-4 h-4 mr-2" />
-                                        Subir Documento
+                                        <Upload className="w-4 h-4 md:mr-2" />
+                                        <span className="hidden md:inline">Subir Documento</span>
                                     </Button>
                                 </CardHeader>
                                 <CardContent>
@@ -694,17 +694,17 @@ export default function CaseDetailsPage() {
                                     ) : (
                                         <div className="space-y-3">
                                             {documentos.map((doc) => (
-                                                <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                    <div className="flex items-center gap-3">
-                                                        <FileText className="w-8 h-8 text-purple-600" />
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">{doc.nombre}</p>
-                                                            <p className="text-xs text-gray-500">
+                                                <div key={doc.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 rounded-lg gap-3">
+                                                    <div className="flex items-center gap-3 min-w-0">
+                                                        <FileText className="w-8 h-8 text-purple-600 flex-shrink-0" />
+                                                        <div className="min-w-0">
+                                                            <p className="font-medium text-gray-900 truncate">{doc.nombre}</p>
+                                                            <p className="text-xs text-gray-500 truncate">
                                                                 {doc.nombre_archivo} • {formatFileSize(doc.tamano_bytes)} • {formatDate(doc.created_at)}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
                                                         <Badge variant="secondary" className="text-xs">{doc.tipo_documento}</Badge>
                                                         <Button variant="ghost" size="icon" onClick={() => descargarDocumento(doc.id)}>
                                                             <Download className="w-4 h-4" />
@@ -724,7 +724,7 @@ export default function CaseDetailsPage() {
                 </div>
 
                 {/* Right Column - Sidebar */}
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                     {/* Aspectos Económicos */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
@@ -825,7 +825,7 @@ export default function CaseDetailsPage() {
 
             {/* Modal Resumen */}
             <Dialog open={showResumenModal} onOpenChange={setShowResumenModal}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Editar Resumen del Caso</DialogTitle>
                     </DialogHeader>
@@ -838,7 +838,7 @@ export default function CaseDetailsPage() {
                             <Label>Descripción</Label>
                             <Textarea value={formData.description || ""} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Área de Práctica</Label>
                                 <Select value={formData.practice_area || ""} onValueChange={(v) => setFormData({ ...formData, practice_area: v })}>
@@ -858,7 +858,7 @@ export default function CaseDetailsPage() {
                                 <Input value={formData.file_number || ""} onChange={(e) => setFormData({ ...formData, file_number: e.target.value })} />
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Contraparte</Label>
                                 <Input value={formData.opponent || ""} onChange={(e) => setFormData({ ...formData, opponent: e.target.value })} />
@@ -921,12 +921,12 @@ export default function CaseDetailsPage() {
 
             {/* Modal Procesal */}
             <Dialog open={showProcesalModal} onOpenChange={setShowProcesalModal}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Editar Estado Procesal</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Estado</Label>
                                 <Select value={formData.status || ""} onValueChange={(v) => setFormData({ ...formData, status: v })}>
@@ -950,7 +950,7 @@ export default function CaseDetailsPage() {
                             <Label>Juzgado / Autoridad</Label>
                             <Input value={formData.court || ""} onChange={(e) => setFormData({ ...formData, court: e.target.value })} />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Jurisdicción</Label>
                                 <Input value={formData.jurisdiction || ""} onChange={(e) => setFormData({ ...formData, jurisdiction: e.target.value })} />
@@ -980,7 +980,7 @@ export default function CaseDetailsPage() {
 
             {/* Modal Estrategia */}
             <Dialog open={showEstrategiaModal} onOpenChange={setShowEstrategiaModal}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Editar Estrategia y Riesgos</DialogTitle>
                     </DialogHeader>

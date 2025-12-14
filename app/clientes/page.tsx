@@ -120,6 +120,8 @@ export default function ClientesPage() {
     // Estados de UI
     const [searchQuery, setSearchQuery] = useState("")
     const [filterEstado, setFilterEstado] = useState<string>("todos")
+    const [filterTipo, setFilterTipo] = useState<string>("todos")
+    const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -178,7 +180,10 @@ export default function ClientesPage() {
             filterEstado === "todos" ||
             (filterEstado === "Activo" && cliente.activo) ||
             (filterEstado === "Inactivo" && !cliente.activo)
-        return matchSearch && matchEstado
+        const matchTipo =
+            filterTipo === "todos" ||
+            cliente.tipo_cliente === filterTipo
+        return matchSearch && matchEstado && matchTipo
     })
 
     // Paginación
@@ -336,30 +341,35 @@ export default function ClientesPage() {
     }
 
     return (
-        <div className="p-8">
+        <div className="p-4 md:p-8">
             <Card className="border-gray-200">
-                <div className="space-y-8 m-8">
+                <div className="space-y-4 md:space-y-8 m-4 md:m-8">
                     {/* Header */}
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-gray-900">Clientes</h1>
-                            <p className="text-gray-600 mt-1">Gestiona tu cartera de clientes</p>
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-xl md:text-2xl font-semibold text-gray-900 truncate">Clientes</h1>
+                            <p className="text-sm md:text-base text-gray-600 mt-1 truncate">Gestiona tu cartera de clientes</p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Button variant="outline" className="gap-2 bg-transparent">
+                        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+                            <Button
+                                variant="outline"
+                                className={`gap-2 ${isFilterOpen ? 'bg-purple-100 border-purple-300' : 'bg-transparent'}`}
+                                size="sm"
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            >
                                 <Filter className="w-4 h-4" />
-                                Filtrar
+                                <span className="hidden md:inline">Filtrar</span>
                             </Button>
-                            <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={handleOpenAddDialog}>
+                            <Button className="bg-purple-600 hover:bg-purple-700 gap-2" size="sm" onClick={handleOpenAddDialog}>
                                 <Plus className="w-4 h-4" />
-                                Nuevo Cliente
+                                <span className="hidden md:inline">Nuevo Cliente</span>
                             </Button>
                         </div>
                     </div>
 
                     {/* Search and Stats */}
-                    <div className="flex items-center gap-4">
-                        <div className="relative flex-1 max-w-md">
+                    <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+                        <div className="relative flex-1 md:max-w-md">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input
                                 placeholder="Buscar clientes..."
@@ -371,42 +381,76 @@ export default function ClientesPage() {
                                 className="pl-10"
                             />
                         </div>
-                        <Select value={filterEstado} onValueChange={(value) => {
-                            setFilterEstado(value)
-                            setCurrentPage(1)
-                        }}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Estado" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="todos">Todos</SelectItem>
-                                <SelectItem value="Activo">Activos</SelectItem>
-                                <SelectItem value="Inactivo">Inactivos</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <div className="flex items-center gap-6 text-sm text-gray-600">
-                            <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm text-gray-600">
+                            <div className="flex items-center gap-1 md:gap-2">
                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                                 <span>{clientes.filter((c) => c.activo).length} Activos</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 md:gap-2">
                                 <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                                 <span>{clientes.filter((c) => !c.activo).length} Inactivos</span>
                             </div>
                         </div>
                     </div>
 
+                    {/* Filtros - Solo visible cuando isFilterOpen es true */}
+                    {isFilterOpen && (
+                        <div className="flex flex-wrap items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 animate-in slide-in-from-top-2 duration-200">
+                            <span className="text-sm font-medium text-gray-700">Filtrar por:</span>
+                            <Select value={filterEstado} onValueChange={(value) => {
+                                setFilterEstado(value)
+                                setCurrentPage(1)
+                            }}>
+                                <SelectTrigger className="w-[140px] md:w-[180px]">
+                                    <SelectValue placeholder="Estado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="todos">Todos los estados</SelectItem>
+                                    <SelectItem value="Activo">Activos</SelectItem>
+                                    <SelectItem value="Inactivo">Inactivos</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select value={filterTipo} onValueChange={(value) => {
+                                setFilterTipo(value)
+                                setCurrentPage(1)
+                            }}>
+                                <SelectTrigger className="w-[140px] md:w-[180px]">
+                                    <SelectValue placeholder="Tipo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="todos">Todos los tipos</SelectItem>
+                                    <SelectItem value="empresa">Empresa</SelectItem>
+                                    <SelectItem value="persona">Persona Física</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {(filterEstado !== "todos" || filterTipo !== "todos") && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-gray-500 hover:text-gray-700"
+                                    onClick={() => {
+                                        setFilterEstado("todos")
+                                        setFilterTipo("todos")
+                                        setCurrentPage(1)
+                                    }}
+                                >
+                                    Limpiar filtros
+                                </Button>
+                            )}
+                        </div>
+                    )}
+
                     {/* Tabla de Clientes */}
-                    <Card className="border-gray-200">
-                        <CardContent className="p-0">
-                            <Table>
+                    <Card className="border-gray-200 overflow-hidden">
+                        <CardContent className="p-0 overflow-x-auto">
+                            <Table className="min-w-full">
                                 <TableHeader>
                                     <TableRow className="bg-gray-50">
                                         <TableHead className="font-medium text-gray-700">Cliente</TableHead>
-                                        <TableHead className="font-medium text-gray-700">Contacto</TableHead>
-                                        <TableHead className="font-medium text-gray-700">Tipo</TableHead>
-                                        <TableHead className="font-medium text-gray-700">Estado</TableHead>
-                                        <TableHead className="font-medium text-gray-700">Registro</TableHead>
+                                        <TableHead className="font-medium text-gray-700 hidden md:table-cell">Contacto</TableHead>
+                                        <TableHead className="font-medium text-gray-700 hidden md:table-cell">Tipo</TableHead>
+                                        <TableHead className="font-medium text-gray-700 hidden md:table-cell">Estado</TableHead>
+                                        <TableHead className="font-medium text-gray-700 hidden md:table-cell">Registro</TableHead>
                                         <TableHead className="font-medium text-gray-700 w-12"></TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -422,27 +466,39 @@ export default function ClientesPage() {
                                     ) : (
                                         clientesPaginados.map((cliente) => (
                                             <TableRow key={cliente.id} className="hover:bg-gray-50">
-                                                <TableCell>
+                                                <TableCell className="max-w-[200px] md:max-w-none">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                                                             {cliente.tipo_cliente === "empresa" ? (
                                                                 <Building2 className="w-5 h-5 text-purple-600" />
                                                             ) : (
                                                                 <User className="w-5 h-5 text-purple-600" />
                                                             )}
                                                         </div>
-                                                        <div>
-                                                            <div className="font-medium text-gray-900">{cliente.nombre}</div>
+                                                        <div className="min-w-0">
+                                                            <div className="font-medium text-gray-900 truncate">{cliente.nombre}</div>
                                                             {cliente.cedula && (
-                                                                <div className="text-sm text-gray-600">{cliente.cedula}</div>
+                                                                <div className="text-sm text-gray-600 truncate">{cliente.cedula}</div>
                                                             )}
                                                             {cliente.persona_contacto && (
-                                                                <div className="text-sm text-gray-500 italic">{cliente.persona_contacto}</div>
+                                                                <div className="text-sm text-gray-500 italic truncate hidden md:block">{cliente.persona_contacto}</div>
                                                             )}
+                                                            {/* Mostrar estado en móvil como badge pequeño */}
+                                                            <div className="md:hidden mt-1">
+                                                                <Badge
+                                                                    variant="secondary"
+                                                                    className={`text-xs ${cliente.activo
+                                                                        ? "bg-green-100 text-green-700"
+                                                                        : "bg-gray-100 text-gray-700"
+                                                                        }`}
+                                                                >
+                                                                    {cliente.activo ? "Activo" : "Inactivo"}
+                                                                </Badge>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="hidden md:table-cell">
                                                     <div className="space-y-1">
                                                         {cliente.email && (
                                                             <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -458,12 +514,12 @@ export default function ClientesPage() {
                                                         )}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="hidden md:table-cell">
                                                     <Badge variant="secondary" className="bg-blue-100 text-blue-700 capitalize">
                                                         {cliente.tipo_cliente === "empresa" ? "Empresa" : "Persona"}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="hidden md:table-cell">
                                                     <Badge
                                                         variant="secondary"
                                                         className={
@@ -475,7 +531,7 @@ export default function ClientesPage() {
                                                         {cliente.activo ? "Activo" : "Inactivo"}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell className="text-gray-600">{formatDate(cliente.created_at)}</TableCell>
+                                                <TableCell className="text-gray-600 hidden md:table-cell">{formatDate(cliente.created_at)}</TableCell>
                                                 <TableCell>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -491,7 +547,9 @@ export default function ClientesPage() {
                                                             <DropdownMenuItem asChild>
                                                                 <Link href={`/clientes/${cliente.id}`}>Ver Perfil</Link>
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem>Ver Casos</DropdownMenuItem>
+                                                            <DropdownMenuItem asChild>
+                                                                <Link href={`/clientes/${cliente.id}/casos`}>Ver Casos</Link>
+                                                            </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
                                                             <DropdownMenuItem
                                                                 className="text-red-600"

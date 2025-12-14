@@ -285,52 +285,108 @@ export default function ClientDetailsPage() {
                                 </div>
                                 <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
                                     <Briefcase className="w-4 h-4 mr-2" />
-                                    Nuevo Caso
+                                    <span className="hidden sm:inline">Nuevo Caso</span>
                                 </Button>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="bg-gray-50">
-                                        <TableHead>ID Caso</TableHead>
-                                        <TableHead>Nombre del Caso</TableHead>
-                                        <TableHead>Tipo</TableHead>
-                                        <TableHead>Fecha Inicio</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                        <TableHead className="text-right">Acciones</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {clientData.casos.map((caso) => (
-                                        <TableRow key={caso.id} className="hover:bg-gray-50">
-                                            <TableCell className="font-mono text-sm font-medium text-purple-600">{caso.id}</TableCell>
-                                            <TableCell className="font-medium">{caso.nombre}</TableCell>
-                                            <TableCell>{caso.tipo}</TableCell>
-                                            <TableCell className="text-gray-600">{caso.fechaInicio}</TableCell>
-                                            <TableCell>
-                                                {caso.estado === "En Proceso" && (
-                                                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                                                        <Clock className="w-3 h-3 mr-1" />
-                                                        {caso.estado}
-                                                    </Badge>
-                                                )}
-                                                {caso.estado === "Completado" && (
-                                                    <Badge variant="secondary" className="bg-green-100 text-green-700">
-                                                        <CheckCircle className="w-3 h-3 mr-1" />
-                                                        {caso.estado}
-                                                    </Badge>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <Button variant="ghost" size="sm" onClick={() => router.push(`/casos/${caso.id}`)}>
-                                                    Ver Detalles
-                                                </Button>
-                                            </TableCell>
+                            {/* Vista móvil - Cards apiladas */}
+                            <div className="md:hidden space-y-4">
+                                {clientData.casos.map((caso) => (
+                                    <div
+                                        key={caso.id}
+                                        className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 hover:bg-purple-50/50 transition-colors"
+                                    >
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex-1 min-w-0">
+                                                <span className="font-mono text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded">
+                                                    {caso.id}
+                                                </span>
+                                                <h3 className="font-medium text-gray-900 mt-2 line-clamp-2">
+                                                    {caso.nombre}
+                                                </h3>
+                                            </div>
+                                            {caso.estado === "En Proceso" && (
+                                                <Badge variant="secondary" className="bg-blue-100 text-blue-700 flex-shrink-0 ml-2">
+                                                    <Clock className="w-3 h-3 mr-1" />
+                                                    {caso.estado}
+                                                </Badge>
+                                            )}
+                                            {caso.estado === "Completado" && (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-700 flex-shrink-0 ml-2">
+                                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                                    {caso.estado}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center gap-4 text-gray-500">
+                                                <span className="flex items-center gap-1">
+                                                    <Briefcase className="w-3 h-3" />
+                                                    {caso.tipo}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Calendar className="w-3 h-3" />
+                                                    {caso.fechaInicio}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-purple-600 hover:text-purple-700 hover:bg-purple-100 -mr-2"
+                                                onClick={() => router.push(`/casos/${caso.id}`)}
+                                            >
+                                                Ver
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Vista desktop - Tabla */}
+                            <div className="hidden md:block">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-gray-50">
+                                            <TableHead>ID Caso</TableHead>
+                                            <TableHead>Nombre del Caso</TableHead>
+                                            <TableHead>Tipo</TableHead>
+                                            <TableHead>Fecha Inicio</TableHead>
+                                            <TableHead>Estado</TableHead>
+                                            <TableHead className="text-right">Acciones</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {clientData.casos.map((caso) => (
+                                            <TableRow key={caso.id} className="hover:bg-gray-50">
+                                                <TableCell className="font-mono text-sm font-medium text-purple-600">{caso.id}</TableCell>
+                                                <TableCell className="font-medium">{caso.nombre}</TableCell>
+                                                <TableCell>{caso.tipo}</TableCell>
+                                                <TableCell className="text-gray-600">{caso.fechaInicio}</TableCell>
+                                                <TableCell>
+                                                    {caso.estado === "En Proceso" && (
+                                                        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                                                            <Clock className="w-3 h-3 mr-1" />
+                                                            {caso.estado}
+                                                        </Badge>
+                                                    )}
+                                                    {caso.estado === "Completado" && (
+                                                        <Badge variant="secondary" className="bg-green-100 text-green-700">
+                                                            <CheckCircle className="w-3 h-3 mr-1" />
+                                                            {caso.estado}
+                                                        </Badge>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button variant="ghost" size="sm" onClick={() => router.push(`/casos/${caso.id}`)}>
+                                                        Ver Detalles
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>

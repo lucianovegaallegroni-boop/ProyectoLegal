@@ -50,13 +50,27 @@ const initialFormData: CaseFormData = {
 
 interface AddCaseModalProps {
     onCaseCreated?: () => void;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    preselectedCliente?: {
+        id: number;
+        nombre: string;
+        email: string | null;
+        telefono: string | null;
+        persona_contacto: string | null;
+    };
 }
 
-export function AddCaseModal({ onCaseCreated }: AddCaseModalProps) {
-    const [open, setOpen] = useState(false)
+export function AddCaseModal({ onCaseCreated, open: controlledOpen, onOpenChange, preselectedCliente }: AddCaseModalProps) {
+    const [internalOpen, setInternalOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [formData, setFormData] = useState<CaseFormData>(initialFormData)
+
+    // Usar estado controlado si se proporciona, sino usar interno
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : internalOpen;
+    const setOpen = isControlled ? (onOpenChange || (() => { })) : setInternalOpen;
 
     // Estados para clientes
     const [clientes, setClientes] = useState<Cliente[]>([])
@@ -71,8 +85,20 @@ export function AddCaseModal({ onCaseCreated }: AddCaseModalProps) {
         if (open) {
             fetchClientes();
             fetchEmpleados();
+
+            // Si hay un cliente preseleccionado, llenar los datos
+            if (preselectedCliente) {
+                setFormData(prev => ({
+                    ...prev,
+                    clienteId: preselectedCliente.id.toString(),
+                    clientName: preselectedCliente.nombre,
+                    email: preselectedCliente.email || "",
+                    phone: preselectedCliente.telefono || "",
+                    contactPerson: preselectedCliente.persona_contacto || "",
+                }));
+            }
         }
-    }, [open]);
+    }, [open, preselectedCliente]);
 
     const fetchClientes = async () => {
         setLoadingClientes(true);
@@ -179,6 +205,206 @@ export function AddCaseModal({ onCaseCreated }: AddCaseModalProps) {
         }
     }
 
+    // Si es controlado externamente, no mostrar el DialogTrigger
+    const dialogContent = (
+        <DialogContent className="w-[95vw] max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
+            <DialogHeader>
+                <DialogTitle className="text-lg md:text-xl">Crear Nuevo Caso</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 py-2 md:py-4">
+
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 md:px-4 md:py-3 rounded-md text-sm">
+                        {error}
+                    </div>
+                )}
+
+                {/* Información del Cliente */}
+                <div className="space-y-3 md:space-y-4">
+                    <h3 className="text-base md:text-lg font-semibold border-b pb-2">Información del Cliente</h3>
+                    <div className="space-y-3 md:space-y-4">
+                        <div className="space-y-1.5 md:space-y-2">
+                            <Label htmlFor="clienteId" className="text-sm">Seleccionar Cliente *</Label>
+                            <Select
+                                value={formData.clienteId}
+                                onValueChange={handleClienteSelect}
+                                disabled={!!preselectedCliente}
+                            >
+                                <SelectTrigger className="text-sm">
+                                    <SelectValue placeholder={loadingClientes ? "Cargando..." : "Seleccionar cliente"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {loadingClientes ? (
+                                        <div className="flex items-center justify-center py-4">
+                                            <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                                        </div>
+                                    ) : clientes.length === 0 ? (
+                                        <div className="py-4 px-2 text-center text-gray-500 text-sm">
+                                            No hay clientes registrados
+                                        </div>
+                                    ) : (
+                                        clientes.map((cliente) => (
+                                            <SelectItem key={cliente.id} value={cliente.id.toString()}>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-sm">{cliente.nombre}</span>
+                                                    {cliente.email && (
+                                                        <span className="text-xs text-gray-500">{cliente.email}</span>
+                                                    )}
+                                                </div>
+                                            </SelectItem>
+                                        ))
+                                    )}
+                                </SelectContent>
+                            </Select>
+                            {preselectedCliente ? (
+                                <p className="text-xs text-purple-600">
+                                    Cliente preseleccionado: {preselectedCliente.nombre}
+                                </p>
+                            ) : (
+                                <p className="text-xs text-gray-500">
+                                    El cliente debe estar registrado previamente
+                                </p>
+                            )}
+                        </div>
+                        {formData.clienteId && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p className="text-xs text-gray-500">Email</p>
+                                    <p className="text-sm font-medium truncate">{formData.email || "No registrado"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Teléfono</p>
+                                    <p className="text-sm font-medium">{formData.phone || "No registrado"}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Datos Fundamentales del Caso */}
+                <div className="space-y-3 md:space-y-4">
+                    <h3 className="text-base md:text-lg font-semibold border-b pb-2">Datos del Caso</h3>
+                    <div className="space-y-1.5 md:space-y-2">
+                        <Label htmlFor="caseTitle" className="text-sm">Título del Caso *</Label>
+                        <Input
+                            id="caseTitle"
+                            placeholder="Ej. Demanda Laboral"
+                            required
+                            className="text-sm"
+                            value={formData.caseTitle}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                    <div className="space-y-1.5 md:space-y-2">
+                        <Label htmlFor="description" className="text-sm">Descripción</Label>
+                        <Textarea
+                            id="description"
+                            placeholder="Resumen breve del caso..."
+                            rows={2}
+                            className="text-sm resize-none"
+                            value={formData.description}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+                    <div className="space-y-1.5 md:space-y-2">
+                        <Label htmlFor="practiceArea" className="text-sm">Área de Práctica</Label>
+                        <Select
+                            value={formData.practiceArea}
+                            onValueChange={(value) => handleSelectChange("practiceArea", value)}
+                        >
+                            <SelectTrigger className="text-sm">
+                                <SelectValue placeholder="Seleccionar área" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="civil">Civil</SelectItem>
+                                <SelectItem value="penal">Penal</SelectItem>
+                                <SelectItem value="laboral">Laboral</SelectItem>
+                                <SelectItem value="mercantil">Mercantil</SelectItem>
+                                <SelectItem value="administrativo">Administrativo</SelectItem>
+                                <SelectItem value="familiar">Familiar</SelectItem>
+                                <SelectItem value="tributario">Tributario</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                {/* Asignación Interna */}
+                <div className="space-y-3 md:space-y-4">
+                    <h3 className="text-base md:text-lg font-semibold border-b pb-2">Asignación</h3>
+                    <div className="space-y-1.5 md:space-y-2">
+                        <Label htmlFor="responsibleLawyer" className="text-sm">Abogado Responsable</Label>
+                        <Select
+                            value={formData.responsibleLawyer}
+                            onValueChange={(value) => handleSelectChange("responsibleLawyer", value)}
+                        >
+                            <SelectTrigger className="text-sm">
+                                <SelectValue placeholder={loadingEmpleados ? "Cargando..." : "Seleccionar abogado"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {loadingEmpleados ? (
+                                    <div className="flex items-center justify-center py-4">
+                                        <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                                    </div>
+                                ) : empleados.length === 0 ? (
+                                    <div className="py-4 px-2 text-center text-gray-500 text-sm">
+                                        No hay empleados registrados
+                                    </div>
+                                ) : (
+                                    empleados.map((empleado) => (
+                                        <SelectItem key={empleado.id} value={empleado.nombre}>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-sm">{empleado.nombre}</span>
+                                                <span className="text-xs text-gray-500">{empleado.rol}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <DialogFooter className="pt-4 border-t flex-col sm:flex-row gap-2 sm:gap-0">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setOpen(false)}
+                        disabled={loading}
+                        className="w-full sm:w-auto order-2 sm:order-1"
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        type="submit"
+                        className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto order-1 sm:order-2"
+                        disabled={loading || !formData.clienteId || !formData.caseTitle}
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Creando...
+                            </>
+                        ) : (
+                            "Crear Caso"
+                        )}
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+    );
+
+    // Si es controlado externamente, no mostrar el trigger
+    if (isControlled) {
+        return (
+            <Dialog open={open} onOpenChange={(isOpen) => {
+                setOpen(isOpen);
+                if (!isOpen) resetForm();
+            }}>
+                {dialogContent}
+            </Dialog>
+        );
+    }
+
     return (
         <Dialog open={open} onOpenChange={(isOpen) => {
             setOpen(isOpen);
@@ -191,183 +417,7 @@ export function AddCaseModal({ onCaseCreated }: AddCaseModalProps) {
                     <span className="sm:hidden">Nuevo</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="w-[95vw] max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
-                <DialogHeader>
-                    <DialogTitle className="text-lg md:text-xl">Crear Nuevo Caso</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 py-2 md:py-4">
-
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 md:px-4 md:py-3 rounded-md text-sm">
-                            {error}
-                        </div>
-                    )}
-
-                    {/* Información del Cliente */}
-                    <div className="space-y-3 md:space-y-4">
-                        <h3 className="text-base md:text-lg font-semibold border-b pb-2">Información del Cliente</h3>
-                        <div className="space-y-3 md:space-y-4">
-                            <div className="space-y-1.5 md:space-y-2">
-                                <Label htmlFor="clienteId" className="text-sm">Seleccionar Cliente *</Label>
-                                <Select
-                                    value={formData.clienteId}
-                                    onValueChange={handleClienteSelect}
-                                >
-                                    <SelectTrigger className="text-sm">
-                                        <SelectValue placeholder={loadingClientes ? "Cargando..." : "Seleccionar cliente"} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {loadingClientes ? (
-                                            <div className="flex items-center justify-center py-4">
-                                                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-                                            </div>
-                                        ) : clientes.length === 0 ? (
-                                            <div className="py-4 px-2 text-center text-gray-500 text-sm">
-                                                No hay clientes registrados
-                                            </div>
-                                        ) : (
-                                            clientes.map((cliente) => (
-                                                <SelectItem key={cliente.id} value={cliente.id.toString()}>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-medium text-sm">{cliente.nombre}</span>
-                                                        {cliente.email && (
-                                                            <span className="text-xs text-gray-500">{cliente.email}</span>
-                                                        )}
-                                                    </div>
-                                                </SelectItem>
-                                            ))
-                                        )}
-                                    </SelectContent>
-                                </Select>
-                                <p className="text-xs text-gray-500">
-                                    El cliente debe estar registrado previamente
-                                </p>
-                            </div>
-                            {formData.clienteId && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <p className="text-xs text-gray-500">Email</p>
-                                        <p className="text-sm font-medium truncate">{formData.email || "No registrado"}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Teléfono</p>
-                                        <p className="text-sm font-medium">{formData.phone || "No registrado"}</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Datos Fundamentales del Caso */}
-                    <div className="space-y-3 md:space-y-4">
-                        <h3 className="text-base md:text-lg font-semibold border-b pb-2">Datos del Caso</h3>
-                        <div className="space-y-1.5 md:space-y-2">
-                            <Label htmlFor="caseTitle" className="text-sm">Título del Caso *</Label>
-                            <Input
-                                id="caseTitle"
-                                placeholder="Ej. Demanda Laboral"
-                                required
-                                className="text-sm"
-                                value={formData.caseTitle}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="space-y-1.5 md:space-y-2">
-                            <Label htmlFor="description" className="text-sm">Descripción</Label>
-                            <Textarea
-                                id="description"
-                                placeholder="Resumen breve del caso..."
-                                rows={2}
-                                className="text-sm resize-none"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="space-y-1.5 md:space-y-2">
-                            <Label htmlFor="practiceArea" className="text-sm">Área de Práctica</Label>
-                            <Select
-                                value={formData.practiceArea}
-                                onValueChange={(value) => handleSelectChange("practiceArea", value)}
-                            >
-                                <SelectTrigger className="text-sm">
-                                    <SelectValue placeholder="Seleccionar área" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="civil">Civil</SelectItem>
-                                    <SelectItem value="penal">Penal</SelectItem>
-                                    <SelectItem value="laboral">Laboral</SelectItem>
-                                    <SelectItem value="mercantil">Mercantil</SelectItem>
-                                    <SelectItem value="administrativo">Administrativo</SelectItem>
-                                    <SelectItem value="familiar">Familiar</SelectItem>
-                                    <SelectItem value="tributario">Tributario</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    {/* Asignación Interna */}
-                    <div className="space-y-3 md:space-y-4">
-                        <h3 className="text-base md:text-lg font-semibold border-b pb-2">Asignación</h3>
-                        <div className="space-y-1.5 md:space-y-2">
-                            <Label htmlFor="responsibleLawyer" className="text-sm">Abogado Responsable</Label>
-                            <Select
-                                value={formData.responsibleLawyer}
-                                onValueChange={(value) => handleSelectChange("responsibleLawyer", value)}
-                            >
-                                <SelectTrigger className="text-sm">
-                                    <SelectValue placeholder={loadingEmpleados ? "Cargando..." : "Seleccionar abogado"} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {loadingEmpleados ? (
-                                        <div className="flex items-center justify-center py-4">
-                                            <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-                                        </div>
-                                    ) : empleados.length === 0 ? (
-                                        <div className="py-4 px-2 text-center text-gray-500 text-sm">
-                                            No hay empleados registrados
-                                        </div>
-                                    ) : (
-                                        empleados.map((empleado) => (
-                                            <SelectItem key={empleado.id} value={empleado.nombre}>
-                                                <div className="flex flex-col">
-                                                    <span className="font-medium text-sm">{empleado.nombre}</span>
-                                                    <span className="text-xs text-gray-500">{empleado.rol}</span>
-                                                </div>
-                                            </SelectItem>
-                                        ))
-                                    )}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <DialogFooter className="pt-4 border-t flex-col sm:flex-row gap-2 sm:gap-0">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setOpen(false)}
-                            disabled={loading}
-                            className="w-full sm:w-auto order-2 sm:order-1"
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            type="submit"
-                            className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto order-1 sm:order-2"
-                            disabled={loading || !formData.clienteId || !formData.caseTitle}
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Creando...
-                                </>
-                            ) : (
-                                "Crear Caso"
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
+            {dialogContent}
         </Dialog>
     )
 }
