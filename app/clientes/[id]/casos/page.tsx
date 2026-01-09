@@ -26,6 +26,7 @@ import {
     Briefcase,
     User,
     Plus,
+    Trash2,
 } from "lucide-react"
 import { AddCaseModal } from "@/components/AddCaseModal"
 
@@ -67,6 +68,7 @@ export default function ClienteCasosPage() {
     const [error, setError] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
     const [isAddCaseModalOpen, setIsAddCaseModalOpen] = useState(false)
+    const [deletingCaseId, setDeletingCaseId] = useState<number | null>(null)
 
     // Cargar datos del cliente
     const fetchCliente = async () => {
@@ -112,6 +114,33 @@ export default function ClienteCasosPage() {
             fetchCasos().finally(() => setLoading(false))
         }
     }, [cliente])
+
+    // Función para borrar un caso
+    const handleDeleteCase = async (casoId: number) => {
+        if (!confirm("¿Estás seguro de que deseas eliminar este caso? Esta acción no se puede deshacer.")) {
+            return
+        }
+
+        setDeletingCaseId(casoId)
+        try {
+            const response = await fetch(`/api/casos/${casoId}`, {
+                method: "DELETE",
+            })
+            const result = await response.json()
+
+            if (!response.ok) {
+                throw new Error(result.error || "Error al eliminar el caso")
+            }
+
+            // Remover el caso de la lista local
+            setCasos((prevCasos) => prevCasos.filter((c) => c.id !== casoId))
+        } catch (err) {
+            console.error("Error deleting case:", err)
+            alert(err instanceof Error ? err.message : "Error al eliminar el caso")
+        } finally {
+            setDeletingCaseId(null)
+        }
+    }
 
     // Filtrar casos por búsqueda
     const casosFiltrados = casos.filter((caso) =>
@@ -403,12 +432,27 @@ export default function ClienteCasosPage() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Link href={`/casos/${caso.id}`}>
-                                                    <Button variant="ghost" size="sm" className="gap-1">
-                                                        <Eye className="w-4 h-4" />
-                                                        <span className="hidden md:inline">Ver</span>
+                                                <div className="flex items-center gap-1">
+                                                    <Link href={`/casos/${caso.id}`}>
+                                                        <Button variant="ghost" size="sm" className="gap-1">
+                                                            <Eye className="w-4 h-4" />
+                                                            <span className="hidden md:inline">Ver</span>
+                                                        </Button>
+                                                    </Link>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        onClick={() => handleDeleteCase(caso.id)}
+                                                        disabled={deletingCaseId === caso.id}
+                                                    >
+                                                        {deletingCaseId === caso.id ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="w-4 h-4" />
+                                                        )}
                                                     </Button>
-                                                </Link>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}

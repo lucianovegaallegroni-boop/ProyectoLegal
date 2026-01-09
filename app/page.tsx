@@ -11,6 +11,7 @@ import {
   Users,
   Clock,
   Scale,
+  Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -77,6 +78,7 @@ export default function Dashboard() {
     casosFinalizados: 0,
     totalClientes: 0,
   })
+  const [deletingCaseId, setDeletingCaseId] = useState<number | null>(null)
 
   // Función para cargar casos desde la API
   const fetchCasos = async () => {
@@ -142,6 +144,39 @@ export default function Dashboard() {
   useEffect(() => {
     loadAllData()
   }, [])
+
+  // Función para borrar un caso
+  const handleDeleteCase = async (e: React.MouseEvent, casoId: number) => {
+    e.stopPropagation() // Evitar que se propague el click a la fila
+
+    if (!confirm("¿Estás seguro de que deseas eliminar este caso? Esta acción no se puede deshacer.")) {
+      return
+    }
+
+    setDeletingCaseId(casoId)
+    try {
+      const response = await fetch(`/api/casos/${casoId}`, {
+        method: "DELETE",
+      })
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Error al eliminar el caso")
+      }
+
+      // Remover el caso de la lista y actualizar stats
+      setCasos((prevCasos) => prevCasos.filter((c) => c.id !== casoId))
+      setStats((prev) => ({
+        ...prev,
+        totalCasos: prev.totalCasos - 1,
+      }))
+    } catch (err) {
+      console.error("Error deleting case:", err)
+      alert(err instanceof Error ? err.message : "Error al eliminar el caso")
+    } finally {
+      setDeletingCaseId(null)
+    }
+  }
 
   // Función para formatear la fecha
   const formatDate = (dateString: string | null) => {
@@ -316,10 +351,10 @@ export default function Dashboard() {
                 <CardTitle className="text-base md:text-lg font-semibold">Lista de Casos</CardTitle>
                 <CardDescription className="text-sm">Todos los casos registrados</CardDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={() => router.push("/casos")}>
+              {/* <Button variant="outline" size="sm" onClick={() => router.push("/casos")}>
                 <Eye className="w-4 h-4 mr-2" />
                 Ver Todos
-              </Button>
+              </Button> */}
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -355,7 +390,22 @@ export default function Dashboard() {
                               <span className="text-xs text-gray-400">{formatDate(caso.created_at)}</span>
                             </div>
                           </div>
-                          <Eye className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Eye className="w-5 h-5 text-gray-400 mt-1" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={(e) => handleDeleteCase(e, caso.id)}
+                              disabled={deletingCaseId === caso.id}
+                            >
+                              {deletingCaseId === caso.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )
@@ -375,7 +425,7 @@ export default function Dashboard() {
                     <TableHead className="font-medium text-gray-700">Área</TableHead>
                     <TableHead className="font-medium text-gray-700">Fecha Inicio</TableHead>
                     <TableHead className="font-medium text-gray-700">Estado</TableHead>
-                    <TableHead className="font-medium text-gray-700 w-12"></TableHead>
+                    <TableHead className="font-medium text-gray-700 w-24">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -427,18 +477,32 @@ export default function Dashboard() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => router.push(`/casos/${caso.id}`)}>
-                                  Ver detalles
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  router.push(`/casos/${caso.id}`)
+                                }}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={(e) => handleDeleteCase(e, caso.id)}
+                                disabled={deletingCaseId === caso.id}
+                              >
+                                {deletingCaseId === caso.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       )

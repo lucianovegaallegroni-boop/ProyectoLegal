@@ -134,7 +134,7 @@ export function Header() {
             </div>
 
             {/* Center Section - Search (Hidden on mobile) */}
-            <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+            {/* <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
                 <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
@@ -142,19 +142,19 @@ export function Header() {
                         className="pl-10 bg-gray-50 border-gray-200 focus:bg-white w-full"
                     />
                 </div>
-            </div>
+            </div> */}
 
             {/* Right Section */}
             <div className="flex items-center gap-2 md:gap-4">
                 {/* Search button for mobile */}
-                <Button variant="ghost" size="icon" className="md:hidden">
+                {/* <Button variant="ghost" size="icon" className="md:hidden">
                     <Search className="w-5 h-5" />
-                </Button>
-
+                </Button> */}
+                {/* 
                 <Button variant="ghost" size="icon" className="relative">
                     <Bell className="w-5 h-5" />
                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </Button>
+                </Button> */}
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

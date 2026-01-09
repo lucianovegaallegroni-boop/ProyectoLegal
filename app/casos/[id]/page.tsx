@@ -488,7 +488,7 @@ export default function CaseDetailsPage() {
 
                     {/* Tabs */}
                     <Tabs defaultValue="procedural" value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-gray-100/50 p-1">
+                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-gray-100/50 p-1 mb-4 md:mb-0">
                             {["procedural", "client", "strategy", "documents"].map((tab) => (
                                 <TabsTrigger key={tab} value={tab} className="relative data-[state=active]:bg-transparent">
                                     <span className="relative z-10">
